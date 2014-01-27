@@ -30,7 +30,7 @@ public class System {
 		canceled = false;
 		
 		listener.newGame(players);
-		MainBoard mainBoard = new MainBoard();
+		MainBoard mainBoard = new MainBoard(players);
 		Player currentPlayer = getFirstPlayer();
 
 		//Loop while there is no winner and we aren't canceled. 

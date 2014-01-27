@@ -95,107 +95,43 @@ public class ConsoleUpdateListener implements UIListener{
 
 	private char[][] getBoardLayout(MainBoard board){
 		char[][] table = new char[9][9];
-		table[0] = new  char[]{
-				bold(board, SubBoard.NORTH_WEST, Position.NORTH_WEST),
-				bold(board, SubBoard.NORTH_WEST, Position.NORTH),
-				bold(board, SubBoard.NORTH_WEST, Position.NORTH_EAST),
-				bold(board, SubBoard.NORTH_WEST, Position.WEST),
-				bold(board, SubBoard.NORTH_WEST, Position.CENTRAL),
-				bold(board, SubBoard.NORTH_WEST, Position.EAST),
-				bold(board, SubBoard.NORTH_WEST, Position.SOUTH_WEST),
-				bold(board, SubBoard.NORTH_WEST, Position.SOUTH),
-				bold(board, SubBoard.NORTH_WEST, Position.SOUTH_EAST)
-		};
-		table[1] = new  char[]{
-				bold(board, SubBoard.NORTH, Position.NORTH_WEST),
-				bold(board, SubBoard.NORTH, Position.NORTH),
-				bold(board, SubBoard.NORTH, Position.NORTH_EAST),
-				bold(board, SubBoard.NORTH, Position.WEST),
-				bold(board, SubBoard.NORTH, Position.CENTRAL),
-				bold(board, SubBoard.NORTH, Position.EAST),
-				bold(board, SubBoard.NORTH, Position.SOUTH_WEST),
-				bold(board, SubBoard.NORTH, Position.SOUTH),
-				bold(board, SubBoard.NORTH, Position.SOUTH_EAST)
-		};
-		table[2] = new  char[]{
-				bold(board, SubBoard.NORTH_EAST, Position.NORTH_WEST),
-				bold(board, SubBoard.NORTH_EAST, Position.NORTH),
-				bold(board, SubBoard.NORTH_EAST, Position.NORTH_EAST),
-				bold(board, SubBoard.NORTH_EAST, Position.WEST),
-				bold(board, SubBoard.NORTH_EAST, Position.CENTRAL),
-				bold(board, SubBoard.NORTH_EAST, Position.EAST),
-				bold(board, SubBoard.NORTH_EAST, Position.SOUTH_WEST),
-				bold(board, SubBoard.NORTH_EAST, Position.SOUTH),
-				bold(board, SubBoard.NORTH_EAST, Position.SOUTH_EAST)
-		};
-		table[3] = new  char[]{
-				bold(board, SubBoard.WEST, Position.NORTH_WEST),
-				bold(board, SubBoard.WEST, Position.NORTH),
-				bold(board, SubBoard.WEST, Position.NORTH_EAST),
-				bold(board, SubBoard.WEST, Position.WEST),
-				bold(board, SubBoard.WEST, Position.CENTRAL),
-				bold(board, SubBoard.WEST, Position.EAST),
-				bold(board, SubBoard.WEST, Position.SOUTH_WEST),
-				bold(board, SubBoard.WEST, Position.SOUTH),
-				bold(board, SubBoard.WEST, Position.SOUTH_EAST)
-		};
-		table[4] = new  char[]{
-				bold(board, SubBoard.CENTRAL, Position.NORTH_WEST),
-				bold(board, SubBoard.CENTRAL, Position.NORTH),
-				bold(board, SubBoard.CENTRAL, Position.NORTH_EAST),
-				bold(board, SubBoard.CENTRAL, Position.WEST),
-				bold(board, SubBoard.CENTRAL, Position.CENTRAL),
-				bold(board, SubBoard.CENTRAL, Position.EAST),
-				bold(board, SubBoard.CENTRAL, Position.SOUTH_WEST),
-				bold(board, SubBoard.CENTRAL, Position.SOUTH),
-				bold(board, SubBoard.CENTRAL, Position.SOUTH_EAST)
-		};
-		table[5] = new  char[]{
-				bold(board, SubBoard.EAST, Position.NORTH_WEST),
-				bold(board, SubBoard.EAST, Position.NORTH),
-				bold(board, SubBoard.EAST, Position.NORTH_EAST),
-				bold(board, SubBoard.EAST, Position.WEST),
-				bold(board, SubBoard.EAST, Position.CENTRAL),
-				bold(board, SubBoard.EAST, Position.EAST),
-				bold(board, SubBoard.EAST, Position.SOUTH_WEST),
-				bold(board, SubBoard.EAST, Position.SOUTH),
-				bold(board, SubBoard.EAST, Position.SOUTH_EAST)
-		};
-		table[6] = new  char[]{
-				bold(board, SubBoard.SOUTH_WEST, Position.NORTH_WEST),
-				bold(board, SubBoard.SOUTH_WEST, Position.NORTH),
-				bold(board, SubBoard.SOUTH_WEST, Position.NORTH_EAST),
-				bold(board, SubBoard.SOUTH_WEST, Position.WEST),
-				bold(board, SubBoard.SOUTH_WEST, Position.CENTRAL),
-				bold(board, SubBoard.SOUTH_WEST, Position.EAST),
-				bold(board, SubBoard.SOUTH_WEST, Position.SOUTH_WEST),
-				bold(board, SubBoard.SOUTH_WEST, Position.SOUTH),
-				bold(board, SubBoard.SOUTH_WEST, Position.SOUTH_EAST)
-		};
-		table[7] = new  char[]{
-				bold(board, SubBoard.SOUTH, Position.NORTH_WEST),
-				bold(board, SubBoard.SOUTH, Position.NORTH),
-				bold(board, SubBoard.SOUTH, Position.NORTH_EAST),
-				bold(board, SubBoard.SOUTH, Position.WEST),
-				bold(board, SubBoard.SOUTH, Position.CENTRAL),
-				bold(board, SubBoard.SOUTH, Position.EAST),
-				bold(board, SubBoard.SOUTH, Position.SOUTH_WEST),
-				bold(board, SubBoard.SOUTH, Position.SOUTH),
-				bold(board, SubBoard.SOUTH, Position.SOUTH_EAST)
-		};
-		table[8] = new  char[]{
-				bold(board, SubBoard.SOUTH_EAST, Position.NORTH_WEST),
-				bold(board, SubBoard.SOUTH_EAST, Position.NORTH),
-				bold(board, SubBoard.SOUTH_EAST, Position.NORTH_EAST),
-				bold(board, SubBoard.SOUTH_EAST, Position.WEST),
-				bold(board, SubBoard.SOUTH_EAST, Position.CENTRAL),
-				bold(board, SubBoard.SOUTH_EAST, Position.EAST),
-				bold(board, SubBoard.SOUTH_EAST, Position.SOUTH_WEST),
-				bold(board, SubBoard.SOUTH_EAST, Position.SOUTH),
-				bold(board, SubBoard.SOUTH_EAST, Position.SOUTH_EAST)
-		};
+		
+		table[0] = makeSubBoard(board, SubBoard.NORTH_WEST);
+		table[1] = makeSubBoard(board, SubBoard.NORTH);
+		table[2] = makeSubBoard(board, SubBoard.NORTH_EAST);
+		table[3] = makeSubBoard(board, SubBoard.WEST);
+		table[4] = makeSubBoard(board, SubBoard.CENTRAL);
+		table[5] = makeSubBoard(board, SubBoard.EAST);
+		table[6] = makeSubBoard(board, SubBoard.SOUTH_WEST);
+		table[7] = makeSubBoard(board, SubBoard.SOUTH);
+		table[8] = makeSubBoard(board, SubBoard.SOUTH_EAST);
 		return table;
 	}
+		
+		
+		private char[] makeSubBoard(MainBoard board, SubBoard subBoard){
+			char[] subBoardTable;
+			if(board.getSubBoard(subBoard).isGameOver()){
+				if(board.getSubBoard(subBoard).getWinner() == null){
+					subBoardTable = new  char[]{'\\','|','/','C','A','T','/','|','\\'};
+				}else{
+					subBoardTable = new  char[]{'\\','|','/','-',board.getSubBoard(subBoard).getWinner().getSymbol(),'-','/','|','\\'};
+				}
+			}else{
+				subBoardTable = new  char[]{
+						bold(board, subBoard, Position.NORTH_WEST),
+						bold(board, subBoard, Position.NORTH),
+						bold(board, subBoard, Position.NORTH_EAST),
+						bold(board, subBoard, Position.WEST),
+						bold(board, subBoard, Position.CENTRAL),
+						bold(board, subBoard, Position.EAST),
+						bold(board, subBoard, Position.SOUTH_WEST),
+						bold(board, subBoard, Position.SOUTH),
+						bold(board, subBoard, Position.SOUTH_EAST)
+				};
+			}
+			return subBoardTable;
+		}
 
 	private char bold(MainBoard board, SubBoard subBoard, Position position) {
 		Player owner = board.getSubBoard(subBoard).getPositionOwner(position);

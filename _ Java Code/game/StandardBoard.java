@@ -143,14 +143,17 @@ public class StandardBoard{
 	 */
 	void setPositionOwner(Player owner, Move move){
 		if(move == null){
+			java.lang.System.err.println(owner.toString() + " gives up!");
 			//Player gives up.
 			isGameOver = true;
 			losers.add(owner);
 			
-			stateChangeListener.handleNotification(new Notification(StateChangeListener.SUB_BOARD_LOSER, this, sequenceNumber.incrementAndGet()), null);
+			stateChangeListener.handleNotification(new Notification(StateChangeListener.PLAYER_QUIT, this, sequenceNumber.incrementAndGet()), owner);
 			
 			return;
 		}
+
+//		java.lang.System.err.println(owner.toString() + " moves to: " + move.toString());
 
 		//  1 | 2 | 3
 		// ---+---+---
@@ -199,6 +202,8 @@ public class StandardBoard{
 		default:
 			throw new IllegalStateException("Must pass in a valid position.");
 		}
+//		java.lang.System.err.println("    Next sub board: " + newSubBoard.toString());
+		
 		//See if there is a winner now or if the game is a draw.
 		calculatePossibleWinner();
 
@@ -220,65 +225,73 @@ public class StandardBoard{
 	}
 
 	private void calculatePossibleWinner() {
-		boolean isCatGame = false;
-				
+		boolean isBoardFull = true;
 		Iterator<EnumSet<Position>> iter = possibleWinningSubBoardPositionCombinations.iterator();
 		//Loop through each of the winning combinations.
 		while(iter.hasNext()){
-			boolean isCatSet = false;
 			boolean isWinningSet = true;
-			Player possibleWinner = null;
 			EnumSet<Position> possibleWinningSet = iter.next();
 			
-			//Loop through each of the positions of this set to see if they have the same owner. 
+			//See if the positions of this set have the same owner. 
 			Iterator<Position> iter2 = possibleWinningSet.iterator();
 			
-			//Set the possible winner to the owner of the first position. 
-			if(iter2.hasNext()){
-				possibleWinner = getPositionOwner(iter2.next());
-			}
+			//NOTE: Assuming that there are 3 positions.
+			Player position1Owner = getPositionOwner(iter2.next());
+			Player position2Owner = getPositionOwner(iter2.next());
+			Player position3Owner = getPositionOwner(iter2.next());
 			
-			//If the owner of the first position is null.
-			if(possibleWinner == null){
-				//move on to the next set.
+			if(position1Owner == null){
+				//First position is open, not a winning set.
 				isWinningSet = false;
-				isCatSet = false;
-			}
-			
-			//Loop through the rest of the positions of this set.
-			for(Position position : possibleWinningSet){
-				Player owner = getPositionOwner(position);
-				if(owner == null){
-					//No owner for this position, can't be a winning set. 
+				isBoardFull = false;
+			}else{
+				if(position2Owner == null){
+					//Second position is open, not a winning set.
 					isWinningSet = false;
-					isCatSet = false;
-				}else if(!owner.equals(possibleWinner)){
-					//The owner of this position is different than the possible winner, 
-					//can't be a winning set and is a cat set.
-					isWinningSet = false;
-					isCatSet = true;
+					isBoardFull = false;
+				}else{
+					if(!position1Owner.equals(position2Owner)){
+						//First 2 positions have different owners, not a winning set. 
+						isWinningSet = false;
+					}else{
+						if(position3Owner == null){
+							//Third position is open, not a winning set.
+							isWinningSet = false;
+							isBoardFull = false;
+						}else{
+							if(position1Owner.equals(position3Owner)){
+								//All positions have the same owner, winning set and not a cat game.
+								isWinningSet = true; //Already set.
+							}else{
+								//Last position has a different owner, not a winning set. 
+								isWinningSet = false;
+							}
+						}
+					}
 				}
 			}
 			
 			if(isWinningSet){
-				winner = possibleWinner;
+//				java.lang.System.err.println("        ...this set is a winner! - " + position1Owner.toString());
+				winner = position1Owner;
 				winningSet = possibleWinningSet;
 				isGameOver = true;
 				
 				stateChangeListener.handleNotification(new Notification(StateChangeListener.SUB_BOARD_WINNER, this, sequenceNumber.incrementAndGet()), null);
 				
 				return;
-			}else if(!isCatSet){
-				isCatGame = false;
 			}
 		}
 		
-		if(isCatGame){
+		if(isBoardFull){
 			isGameOver = true;
 			
 			stateChangeListener.handleNotification(new Notification(StateChangeListener.SUB_BOARD_TIE, this, sequenceNumber.incrementAndGet()), null);
+			
+			return;
 		}
 		
+//		java.lang.System.err.println("    this board is not won but its still possible.");
 		
 	}
 	
@@ -300,7 +313,29 @@ public class StandardBoard{
 		return toString.toString();
 		
 	}
+	
+	public static HashSet<EnumSet<Position>> getSetsWithPosition(Position position){
+		HashSet<EnumSet<Position>> positionSets = new HashSet<EnumSet<Position>>();
+		
+		for(EnumSet<Position> currentSet : possibleWinningSubBoardPositionCombinations){
+			if(currentSet.contains(position)){
+				positionSets.add(currentSet);
+			}
+		}
+		
+		return positionSets;
+	}
 
+	/**
+	 * The position reference on a standard board (sub board).
+	 * <pre>
+	 *   NW | N | NE
+	 *  ----+---+----
+	 *    W | C | E
+	 *  ----+---+----
+	 *   SW | S | SE
+	 *  </pre>
+	 */
 	public enum Position{
 		NORTH_WEST,
 		NORTH,

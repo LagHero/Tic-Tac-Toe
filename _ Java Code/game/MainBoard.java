@@ -6,6 +6,7 @@ import game.StandardBoard.Position;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.management.Notification;
@@ -16,6 +17,7 @@ import player.Player;
 public class MainBoard {
 
 	private Player winner;
+	private List<Player> players;
 	private Set<SubBoard> winningSet;
 	private boolean isGameOver;
 	private SubBoard currentSubBoard;
@@ -33,9 +35,9 @@ public class MainBoard {
 	}
 	
 	
-	public MainBoard(){
+	public MainBoard(List<Player> players){
 		super();
-
+		this.players = players;
 		winner = null;
 		winningSet = null;
 		isGameOver = false;
@@ -63,7 +65,7 @@ public class MainBoard {
 
 		public static final String SUB_BOARD_WINNER = "SUB_BOARD_WINNER";
 		public static final String SUB_BOARD_TIE = "SUB_BOARD_TIE";
-		public static final String SUB_BOARD_LOSER = "SUB_BOARD_LOSER";
+		public static final String PLAYER_QUIT = "PLAYER_QUIT";
 		public static final String NEW_SUB_BOARD = "NEW_SUB_BOARD";
 		
 		@Override
@@ -80,8 +82,13 @@ public class MainBoard {
 				calculatePossibleWinner();
 			}else if(notification.getType().equals(SUB_BOARD_TIE)){
 				calculatePossibleWinner();
-			}else if(notification.getType().equals(SUB_BOARD_LOSER)){
-				calculatePossibleWinner();
+			}else if(notification.getType().equals(PLAYER_QUIT)){
+				Player loser = (Player) handback;
+				for(Player player : players){
+					if(!player.equals(loser)){
+						winner = player;
+					}
+				}
 			}
 		}
 	}
@@ -195,58 +202,124 @@ public class MainBoard {
 		Iterator<EnumSet<SubBoard>> iter = possibleWinningSubBoardCombinations.iterator();
 		//Loop through each of the winning combinations.
 		while(iter.hasNext()){
-			boolean isCatSet = false;
-			boolean isWinningSet = true;
-			Player possibleWinner = null;
+			boolean isWinningSet = false;
 			EnumSet<SubBoard> possibleWinningSet = iter.next();
+//			java.lang.System.err.println("    Checking set: " + possibleWinningSet.toString());
 			
 			//Loop through each of the positions of this set to see if they have the same owner. 
 			Iterator<SubBoard> iter2 = possibleWinningSet.iterator();
+
+			//NOTE: Assuming that there are 3 sub boards.
+			StandardBoard subBoard1 = getSubBoard(iter2.next());
+			StandardBoard subBoard2 = getSubBoard(iter2.next());
+			StandardBoard subBoard3 = getSubBoard(iter2.next());
 			
-			//Set the possible winner to the owner of the first position. 
-			if(iter2.hasNext()){
-				possibleWinner = getSubBoard(iter2.next()).getWinner();
-			}
+			Player subBoard1Owner = subBoard1.getWinner();
+			Player subBoard2Owner = subBoard2.getWinner();
+			Player subBoard3Owner = subBoard3.getWinner();
+//			java.lang.System.err.println(String.format("        Players: %s, %s, %s", subBoard1Owner, subBoard2Owner, subBoard3Owner));
 			
-			//If the owner of the first position is null.
-			if(possibleWinner == null){
-				//move on to the next set.
-				isWinningSet = false;
-				isCatSet = false;
-			}
+			boolean subBoard1GameOver = subBoard1.isGameOver();
+			boolean subBoard2GameOver = subBoard2.isGameOver();
+			boolean subBoard3GameOver = subBoard3.isGameOver();
+//			java.lang.System.err.println(String.format("        Game Over: %s, %s, %s", subBoard1GameOver, subBoard2GameOver, subBoard3GameOver));
 			
-			//Loop through the rest of the positions of this set.
-			for(SubBoard subBoard : possibleWinningSet){
-				Player owner = getSubBoard(subBoard).getWinner();
-				if(owner == null){
-					//No owner for this position, can't be a winning set. 
-					isWinningSet = false;
-					isCatSet = false;
-				}else if(!owner.equals(possibleWinner)){
-					//The owner of this position is different than the possible winner, 
-					//can't be a winning set and is a cat set.
-					isWinningSet = false;
-					isCatSet = true;
+			if(subBoard1GameOver){
+				if(subBoard2GameOver){
+					if(subBoard3GameOver){
+						//All 3 games are over...
+						isWinningSet = isWinningSet(subBoard1Owner, subBoard2Owner, subBoard3Owner);
+						isCatGame = isCatGame || isCatSet(subBoard1Owner, subBoard2Owner, subBoard3Owner);
+					}else{
+						//Games 1 & 2 are over...
+						isCatGame = isCatGame || isCatSet(subBoard1Owner, subBoard2Owner);
+					}
+				}else{
+					if(subBoard3GameOver){
+						//Games 1 & 3 are over...
+						isCatGame = isCatGame || isCatSet(subBoard1Owner, subBoard3Owner);
+					}else{
+						//Game 1 is over...
+						isCatGame = false;
+					}
+				}
+			}else{
+				if(subBoard2GameOver){
+					if(subBoard3GameOver){
+						//Games 2 & 3 are over...
+						isCatGame = isCatGame || isCatSet(subBoard2Owner, subBoard3Owner);
+					}else{
+						//Game 2 is over...
+						isCatGame = false;
+					}
+				}else{
+					if(subBoard3GameOver){
+						//Game 3 is over...
+						isCatGame = false;
+					}else{
+						//No games are over...
+						isCatGame = false;
+					}
 				}
 			}
-			
+//			java.lang.System.err.println(String.format("        Is Winning Set: %s", isWinningSet));
 			if(isWinningSet){
-				winner = possibleWinner;
+				winner = subBoard1Owner;
 				winningSet = possibleWinningSet;
 				isGameOver = true;
 				return;
-			}else if(!isCatSet){
-				isCatGame = false;
 			}
 		}
-		
+//		java.lang.System.err.println(String.format("    Is Cat Game: %s", isCatGame));
 		if(isCatGame){
 			isGameOver = true;
-		}
-		
-		
+		}	
 	}
 	
+	private boolean isCatSet(Player... subBoardOwners) {
+		Player setWinner = null;
+		for(Player owner : subBoardOwners){
+			if(owner == null){
+				//One of the owners of a board is null (cat board), this set is cat.
+				return true;
+			}
+			if(setWinner == null){
+				//First board, set the winner for the set.
+				setWinner = owner;
+			}else{
+				//Check if the winner of this board matches the winners of previous boards.
+				if(owner != setWinner){
+					//New winner, not the same winner in all boards, this set is cat. 
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isWinningSet(Player subBoard1Owner, Player subBoard2Owner, Player subBoard3Owner) {
+		//Check if any of the owners are null (cat board).
+		if(subBoard1Owner == null || subBoard2Owner == null || subBoard3Owner == null){
+			return false;
+		}
+		//Check if all the owners are the same.
+		if(subBoard1Owner.equals(subBoard2Owner) && subBoard2Owner.equals(subBoard3Owner) && subBoard3Owner.equals(subBoard1Owner)){
+			return true;
+		}
+		//Otherwise, there are different owners (cat set of boards).
+		return false;
+	}
+
+	/**
+	 * The sub board reference on the main board (sub board).
+	 * <pre>
+	 *   NW | N | NE
+	 *  ----+---+----
+	 *    W | C | E
+	 *  ----+---+----
+	 *   SW | S | SE
+	 *  </pre>
+	 */
 	public enum SubBoard{
 		NORTH_WEST,
 		NORTH,
